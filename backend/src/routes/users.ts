@@ -1,3 +1,5 @@
 import express from "express"
-import dotenv from "dotenv"
-import cors from "cors"
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+import cryptoDB from "../../db/crypto_db"
+import { authenticateToken } from "../middleware/authMiddleware"
