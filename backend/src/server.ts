@@ -4,6 +4,7 @@ import cors from "cors"
 
 import { updateTopCryptos } from "./routes/crypto"
 import cryptoRoutes from "./routes/crypto"
+import authRoutes from "./routes/users"
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use(`/api/crypto`, cryptoRoutes);
+app.use(`/api/auth`, authRoutes);
 
 (async () => {
     try {
