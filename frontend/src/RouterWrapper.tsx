@@ -4,7 +4,6 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Signup2 from "./pages/Signup2"
 import Signin from "./pages/Signin";
-//import SignUpButton from "./components/SignUpButton";
 
 const RouterWrapper: React.FC = () => {
   return (

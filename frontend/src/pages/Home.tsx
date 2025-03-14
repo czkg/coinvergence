@@ -1,5 +1,6 @@
 import React from "react"
 import { useNavigate } from "react-router-dom"
+import CryptoPriceTracker from "../components/CryptoPriceTracker"
 
 const Home: React.FC = () => {
   const navigate = useNavigate(); // Enables navigation without reloading
@@ -38,13 +39,8 @@ const Home: React.FC = () => {
           <button className="border border-gray-800 px-4 py-1 text-sm">Shop all</button>
         </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
-          {Array.from({ length: 9 }, (_, i) => (
-            <div key={i} id={`trending_${i + 1}`}>
-              name
-              <a className="text-green-700 underline" href="#">
-                Product Name
-              </a>
-            </div>
+          {Array.from({ length: 9 }).map((_, i) => (
+            <CryptoPriceTracker key={i} display_id={i + 1} />
           ))}
         </div>
       </section>
