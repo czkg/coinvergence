@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const Signup2: React.FC = () => {
+  const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -36,6 +38,12 @@ const Signup2: React.FC = () => {
 
   return (
     <div className="bg-gray-100 flex items-center justify-center min-h-screen">
+      <img
+        src="/logo.png"
+        alt="Coinvergence Logo"
+        className="absolute top-4 left-4 w-12 h-12 sm:w-16 sm:h-16 cursor-pointer"
+        onClick={() => navigate("/")}
+      />
       <div className="bg-white w-full max-w-md p-8 rounded-lg shadow-md mx-auto">
         <h1 className="text-2xl font-bold text-center mb-2">ENTER DETAILS</h1>
         <p className="text-center text-gray-600 mb-6">

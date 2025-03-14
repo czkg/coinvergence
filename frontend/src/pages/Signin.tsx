@@ -1,6 +1,8 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const Signin: React.FC = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,6 +17,12 @@ const Signin: React.FC = () => {
 
   return (
     <div className="bg-gray-100 flex items-center justify-center min-h-screen">
+      <img
+        src="/logo.png"
+        alt="Coinvergence Logo"
+        className="absolute top-4 left-4 w-12 h-12 sm:w-16 sm:h-16 cursor-pointer"
+        onClick={() => navigate("/")}
+      />
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
         <div className="text-center mb-6">
           <img alt="Logo of a cannon" className="mx-auto mb-4" src="https://placehold.co/64x64" />

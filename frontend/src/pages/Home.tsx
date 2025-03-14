@@ -1,9 +1,15 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import CryptoPriceTracker from "../components/CryptoPriceTracker"
 
 const Home: React.FC = () => {
   const navigate = useNavigate(); // Enables navigation without reloading
+
+  const cryptoTrackers = useMemo(() => (
+    Array.from({ length: 9 }).map((_, i) => (
+      <CryptoPriceTracker key={i} display_id={i + 1} />
+    ))
+  ), []);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -39,9 +45,7 @@ const Home: React.FC = () => {
           <button className="border border-gray-800 px-4 py-1 text-sm">Shop all</button>
         </div>
         <div className="grid grid-cols-3 gap-4 text-sm">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <CryptoPriceTracker key={i} display_id={i + 1} />
-          ))}
+          {cryptoTrackers}
         </div>
       </section>
 
