@@ -1,9 +1,11 @@
-import React, { useMemo } from "react"
+import React, { useMemo, useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import CryptoPriceTracker from "../components/CryptoPriceTracker"
 
 const Home: React.FC = () => {
   const navigate = useNavigate(); // Enables navigation without reloading
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cryptoTrackers = useMemo(() => (
     Array.from({ length: 9 }).map((_, i) => (
@@ -11,17 +13,63 @@ const Home: React.FC = () => {
     ))
   ), []);
 
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Header */}
-      <header className="text-center mb-12">
-        <h1 className="text-2xl font-bold" style={{ fontFamily: "Georgia, serif", fontSize: "40px" }}>
+      <header className="relative flex items-center justify-between mb-12">
+        {/* Empty div for left alignment */}
+        <div></div>
+        <h1 className="text-2xl font-bold text-center" style={{ fontFamily: "Georgia, serif", fontSize: "40px" }}>
           Coinvergence
         </h1>
+
+        {/* User Logo (Upper Right) with Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <img
+            src="/user-icon.png" // User icon for dropdown
+            alt="User"
+            className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer"
+            onClick={toggleDropdown}
+          />
+
+          {/* Dropdown Menu */}
+          {dropdownOpen && (
+            <div className="absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-md">
+              <button
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                onClick={() => navigate("/signin")}
+              >
+                Sign In
+              </button>
+              <button
+                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                onClick={() => navigate("/signup")}
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       {/* Sign Up & Log In */}
-      <section className="relative mb-12 pt-6">
+      {/* <section className="relative mb-12 pt-6">
         <div className="absolute top-0 right-0">
           <button
             onClick={() => navigate("/signup")}
@@ -36,7 +84,7 @@ const Home: React.FC = () => {
             Log In
           </button>
         </div>
-      </section>
+      </section> */}
 
       {/* Trending Coins Section */}
       <section className="mb-16">
