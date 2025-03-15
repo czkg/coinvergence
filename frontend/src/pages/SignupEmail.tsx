@@ -1,9 +1,11 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SignupEmail: React.FC = () => {
   const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,9 +14,23 @@ const SignupEmail: React.FC = () => {
     linkCompany: false,
   });
 
-  // Toggle password visibility
-  const togglePassword = () => {
-    setPasswordVisible(!passwordVisible);
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Password validation rules
+  const passwordCriteria = [
+    { label: "At least 10 characters", regex: /.{10,}/ },
+    { label: "At least one uppercase letter (A-Z)", regex: /[A-Z]/ },
+    { label: "At least one lowercase letter (a-z)", regex: /[a-z]/ },
+    { label: "At least one number (0-9)", regex: /\d/ },
+  ];
+
+  // Check if password meets each requirement
+  const checkPasswordCriteria = (password: string) => {
+    return passwordCriteria.map((criterion) => ({
+      label: criterion.label,
+      met: criterion.regex.test(password),
+    }));
   };
 
   // Handle input change
@@ -29,25 +45,38 @@ const SignupEmail: React.FC = () => {
   // Form validation before submit
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const unmetCriteria = checkPasswordCriteria(formData.password).filter((c) => !c.met);
     if (!formData.firstName || !formData.email) {
       alert("Please fill in all required fields.");
       return;
     }
+    if (!emailRegex.test(formData.email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    if (unmetCriteria.length > 0) {
+      alert("Password does not meet all requirements.");
+      return;
+    }
+
     console.log("Form submitted:", formData);
   };
 
   return (
-    <div className="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div className="bg-gray-100 flex flex-col items-center justify-center min-h-screen relative">
+      {/* Clickable Logo to Navigate Home */}
       <img
         src="/logo.png"
         alt="Coinvergence Logo"
-        className="absolute top-6 left-6 h-auto w-28 sm:w-36 md:w-44 lg:w-52 xl:w-60 object-contain cursor-pointer"
+        className="absolute top-6 left-6 h-auto w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 object-contain cursor-pointer"
         onClick={() => navigate("/")}
       />
-      <div className="bg-white w-full max-w-md p-8 rounded-lg shadow-md mx-auto">
+
+      <div className="bg-white w-full max-w-md p-8 rounded-lg shadow-md mx-auto mt-20">
         <h1 className="text-2xl font-bold text-center mb-2">ENTER DETAILS</h1>
         <p className="text-center text-gray-600 mb-6">
-          Welcome to The Arsenal family, please enter your personal details to create your account.
+          Welcome to the Coinvergence family, please enter your personal details to create your account.
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -84,12 +113,22 @@ const SignupEmail: React.FC = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+              onFocus={() => setEmailFocused(true)}
+              onBlur={() => setEmailFocused(false)}
+              className={`w-full border rounded-md p-2 focus:outline-none focus:ring-2 ${
+                emailRegex.test(formData.email) || !emailFocused
+                  ? "border-gray-300 focus:ring-red-500"
+                  : "border-red-500 focus:ring-red-600"
+              }`}
               required
             />
+            {/* Email validation feedback only appears when focused */}
+            {emailFocused && !emailRegex.test(formData.email) && (
+              <p className="text-red-500 text-xs mt-1">Invalid email format</p>
+            )}
           </div>
 
-          {/* Password with Toggle */}
+          {/* Password with Toggle & Validation */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
@@ -98,64 +137,44 @@ const SignupEmail: React.FC = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => !formData.password && setPasswordFocused(false)}
                 className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-red-500"
                 required
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-2 flex items-center text-gray-500"
-                onClick={togglePassword}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                onClick={() => setPasswordVisible(!passwordVisible)}
               >
-                <i className={passwordVisible ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+                <i className={`fas ${passwordVisible ? "fa-eye-slash" : "fa-eye"}`}></i>
               </button>
             </div>
           </div>
 
-          {/* Terms & Conditions */}
-          <p className="text-sm text-gray-600 mb-4">
-            Your password must contain at least 10 characters and include the following:
-          </p>
-          <ul className="text-sm text-gray-600 list-disc pl-5 mb-4">
-            <li>An uppercase letter</li>
-            <li>A lowercase letter</li>
-            <li>A number</li>
-          </ul>
-
-          {/* Checkbox: Link a Company */}
-          <div className="mb-6">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                name="linkCompany"
-                checked={formData.linkCompany}
-                onChange={handleChange}
-                className="form-checkbox text-red-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">
-                I would like to link a company to this account.
-              </span>
-            </label>
-          </div>
+          {/* Password Strength Indicator - Only Visible When Focused */}
+          {passwordFocused && (
+            <div className="mb-4">
+              <p className="text-sm font-medium text-gray-700">Password must include:</p>
+              <ul className="text-sm list-none pl-2 mt-1">
+                {checkPasswordCriteria(formData.password).map(({ label, met }, index) => (
+                  <li key={index} className={`flex items-center ${met ? "text-green-600" : "text-red-500"}`}>
+                    <i className={`fas ${met ? "fa-check-circle" : "fa-times-circle"} mr-2`}></i>
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-red-600 text-white py-2 rounded-md text-sm font-medium hover:bg-red-700"
+            className="w-full bg-red-600 text-white py-2 rounded-md text-sm font-medium hover:bg-red-700 transition"
           >
             AGREE & CONTINUE
           </button>
         </form>
-
-        {/* Footer Links */}
-        <div className="text-center mt-6">
-          <a className="text-sm text-gray-500 hover:underline" href="#">
-            Terms & Conditions
-          </a>
-          <span className="mx-2 text-gray-500"> | </span>
-          <a className="text-sm text-gray-500 hover:underline" href="#">
-            Privacy Policy
-          </a>
-        </div>
       </div>
     </div>
   );
