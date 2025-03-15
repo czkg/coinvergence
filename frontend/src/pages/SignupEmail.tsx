@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
 
-const Signup2: React.FC = () => {
+const SignupEmail: React.FC = () => {
   const navigate = useNavigate();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
@@ -161,4 +161,4 @@ const Signup2: React.FC = () => {
   );
 };
 
-export default Signup2;
+export default SignupEmail;

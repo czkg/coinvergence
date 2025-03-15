@@ -20,7 +20,7 @@ const Signup: React.FC = () => {
         </p>
 
         <button 
-          onClick={() => navigate("/signup2")}
+          onClick={() => navigate("/signupEmail")}
           className="w-full bg-red-700 text-white py-2 rounded-lg font-semibold mb-4"
         >
           EMAIL ADDRESS

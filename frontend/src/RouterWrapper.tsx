@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
-import Signup2 from "./pages/Signup2"
+import SignupEmail from "./pages/SignupEmail"
 import Signin from "./pages/Signin";
 
 const RouterWrapper: React.FC = () => {
@@ -11,7 +11,7 @@ const RouterWrapper: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/signup2" element={<Signup2 />}/>
+        <Route path="/signupEmail" element={<SignupEmail />}/>
         <Route path="/signin" element={<Signin />} />
       </Routes>
     </BrowserRouter>
