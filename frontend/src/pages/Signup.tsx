@@ -9,13 +9,10 @@ const Signup: React.FC = () => {
       <img
         src="/logo.png"
         alt="Coinvergence Logo"
-        className="absolute top-4 left-4 w-12 h-12 sm:w-16 sm:h-16 cursor-pointer"
+        className="absolute top-6 left-6 h-auto w-28 sm:w-36 md:w-44 lg:w-52 xl:w-60 object-contain cursor-pointer"
         onClick={() => navigate("/")}
       />
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8 text-center">
-        <div className="mb-6">
-          <img alt="Coinvergence logo" className="mx-auto" src="https://placehold.co/64x64" />
-        </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">SIGN UP FOR</h1>
         <h2 className="text-2xl font-bold text-gray-800 mb-4">COINVERGENCE</h2>
         <p className="text-gray-600 mb-6">

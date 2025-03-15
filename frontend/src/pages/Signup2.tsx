@@ -41,7 +41,7 @@ const Signup2: React.FC = () => {
       <img
         src="/logo.png"
         alt="Coinvergence Logo"
-        className="absolute top-4 left-4 w-12 h-12 sm:w-16 sm:h-16 cursor-pointer"
+        className="absolute top-6 left-6 h-auto w-28 sm:w-36 md:w-44 lg:w-52 xl:w-60 object-contain cursor-pointer"
         onClick={() => navigate("/")}
       />
       <div className="bg-white w-full max-w-md p-8 rounded-lg shadow-md mx-auto">

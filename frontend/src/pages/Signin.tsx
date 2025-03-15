@@ -20,12 +20,11 @@ const Signin: React.FC = () => {
       <img
         src="/logo.png"
         alt="Coinvergence Logo"
-        className="absolute top-4 left-4 w-12 h-12 sm:w-16 sm:h-16 cursor-pointer"
+        className="absolute top-6 left-6 h-auto w-28 sm:w-36 md:w-44 lg:w-52 xl:w-60 object-contain cursor-pointer"
         onClick={() => navigate("/")}
       />
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8">
         <div className="text-center mb-6">
-          <img alt="Logo of a cannon" className="mx-auto mb-4" src="https://placehold.co/64x64" />
           <h1 className="text-2xl font-bold text-gray-800">SIGN IN</h1>
           <p className="text-sm text-gray-600 mt-2">Use your email address or username to sign into your account</p>
         </div>

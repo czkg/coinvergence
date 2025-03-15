@@ -35,9 +35,12 @@ const Home: React.FC = () => {
       <header className="relative flex items-center justify-between mb-12">
         {/* Empty div for left alignment */}
         <div></div>
-        <h1 className="text-2xl font-bold text-center" style={{ fontFamily: "Georgia, serif", fontSize: "40px" }}>
-          Coinvergence
-        </h1>
+        <img
+          src="/logo.png"
+          alt="Coinvergence Logo"
+          className="h-12 sm:h-16 cursor-pointer"
+          onClick={() => navigate("/")}
+        />
 
         {/* User Logo (Upper Right) with Dropdown */}
         <div className="relative" ref={dropdownRef}>
@@ -67,24 +70,6 @@ const Home: React.FC = () => {
           )}
         </div>
       </header>
-
-      {/* Sign Up & Log In */}
-      {/* <section className="relative mb-12 pt-6">
-        <div className="absolute top-0 right-0">
-          <button
-            onClick={() => navigate("/signup")}
-            className="bg-green-700 text-white px-4 py-2 rounded-md mr-2 hover:bg-green-600"
-          >
-            Sign Up
-          </button>
-          <button
-            onClick={() => navigate("/signin")}
-            className="border border-gray-800 px-4 py-2 rounded-md hover:bg-gray-100"
-          >
-            Log In
-          </button>
-        </div>
-      </section> */}
 
       {/* Trending Coins Section */}
       <section className="mb-16">
