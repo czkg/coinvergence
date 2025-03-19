@@ -11,7 +11,6 @@ const SignupEmail: React.FC = () => {
     lastName: "",
     email: "",
     password: "",
-    linkCompany: false,
   });
 
   // Email validation regex
@@ -43,7 +42,7 @@ const SignupEmail: React.FC = () => {
   };
 
   // Form validation before submit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const unmetCriteria = checkPasswordCriteria(formData.password).filter((c) => !c.met);
@@ -58,6 +57,26 @@ const SignupEmail: React.FC = () => {
     if (unmetCriteria.length > 0) {
       alert("Password does not meet all requirements.");
       return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/signup", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if(response.ok) {
+        alert("User registered successfully!");
+        console.log("User data saved:", data);
+      } else {
+        alert(data.error || "Signup failed");
+      }
+    } catch (error) {
+      console.error("Signup Error:", error);
+      alert("An error occurred while signing up.");
     }
 
     console.log("Form submitted:", formData);

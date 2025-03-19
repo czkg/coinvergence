@@ -5,6 +5,7 @@ import CryptoPriceTracker from "../components/CryptoPriceTracker"
 const Home: React.FC = () => {
   const navigate = useNavigate(); // Enables navigation without reloading
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cryptoTrackers = useMemo(() => (
@@ -17,6 +18,20 @@ const Home: React.FC = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
+  //detect authentication state
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsAuthenticated(!!token);
+    };
+    checkAuth();
+
+    //listen for login updates from Signin.tsx
+    window.addEventListener("userUpdated", checkAuth);
+    return () => window.removeEventListener("userUpdated", checkAuth);
+  }, []);
+
+  //close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -28,6 +43,14 @@ const Home: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  //handle sign out
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+    navigate("/");
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -53,19 +76,30 @@ const Home: React.FC = () => {
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-32 bg-white border rounded-lg shadow-md">
-              <button
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                onClick={() => navigate("/signin")}
-              >
-                Sign In
-              </button>
-              <button
-                className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                onClick={() => navigate("/signup")}
-              >
-                Sign Up
-              </button>
+            <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-md">
+              {isAuthenticated ? (
+                <button
+                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                  onClick={handleLogout}
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => navigate("/signin")}
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => navigate("/signup")}
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
