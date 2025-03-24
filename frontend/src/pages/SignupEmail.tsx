@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const SignupEmail: React.FC = () => {
   const navigate = useNavigate();
@@ -12,6 +12,10 @@ const SignupEmail: React.FC = () => {
     email: "",
     password: "",
   });
+
+  const [isRegistered, setIsRegistered] = useState(false);  // state to control welcome message visibility
+  const [username, setUsername] = useState("");  // store the user's first name or full name
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false); // Show verification message after registration
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,7 +64,7 @@ const SignupEmail: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/signup", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/auth/signup`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(formData),
@@ -69,8 +73,13 @@ const SignupEmail: React.FC = () => {
       const data = await response.json();
 
       if(response.ok) {
-        alert("User registered successfully!");
         console.log("User data saved:", data);
+        setUsername(formData.firstName);
+        setIsRegistered(true);
+        setShowVerificationMessage(true); // Show the verification message
+        setTimeout(() => {
+          navigate("/");  // Redirect to home after 3 seconds
+        }, 3000);
       } else {
         alert(data.error || "Signup failed");
       }
@@ -194,6 +203,13 @@ const SignupEmail: React.FC = () => {
             AGREE & CONTINUE
           </button>
         </form>
+
+        {/* Display the success message if registered */}
+        {isRegistered && showVerificationMessage && (
+          <div className="mt-4 text-center text-green-500">
+            <p>Please check your email to verify your account.</p>
+          </div>
+        )}
       </div>
     </div>
   );

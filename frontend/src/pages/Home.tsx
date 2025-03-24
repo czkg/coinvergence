@@ -6,6 +6,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate(); // Enables navigation without reloading
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [username, setUsername] = useState(""); // Store user's name
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cryptoTrackers = useMemo(() => (
@@ -22,7 +23,12 @@ const Home: React.FC = () => {
   useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
+      const storedUser = localStorage.getItem("user");
       setIsAuthenticated(!!token);
+
+      if(storedUser) {
+        setUsername(JSON.parse(storedUser).firstName);
+      }
     };
     checkAuth();
 
@@ -49,6 +55,7 @@ const Home: React.FC = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsAuthenticated(false);
+    setUsername(""); //clear username on logout
     navigate("/");
   };
 
@@ -78,12 +85,32 @@ const Home: React.FC = () => {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-md">
               {isAuthenticated ? (
-                <button
-                  className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                  onClick={handleLogout}
-                >
-                  Sign Out
-                </button>
+                <>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => navigate("/profile")} // Navigate to Profile page
+                  >
+                    {username ? `${username}'s Profile` : "Profile"}
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => navigate("/settings")} // Navigate to Settings page
+                  >
+                    Settings
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={() => navigate("/my-wallet")} // Navigate to My Wallet page
+                  >
+                    My Wallet
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                    onClick={handleLogout}
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <>
                   <button

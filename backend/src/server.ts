@@ -4,7 +4,7 @@ import cors from "cors"
 
 import { updateTopCryptos } from "./routes/crypto"
 import cryptoRoutes from "./routes/crypto"
-import authRoutes from "./routes/users"
+import authRoutes from "./routes/user"
 
 dotenv.config();
 

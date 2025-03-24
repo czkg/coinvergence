@@ -10,7 +10,7 @@ const CryptoPriceTracker: React.FC<CryptoPriceTrackerProps> = ({ display_id }) =
     useEffect(() => {
         const fetchTopCrypto = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/crypto/trending_cap");
+                const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/crypto/trending_cap`);
                 const data = await response.json();
                 
                 if (data.length >= display_id) {
