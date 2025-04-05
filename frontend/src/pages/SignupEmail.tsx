@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const SignupEmail: React.FC = () => {
   const navigate = useNavigate();
@@ -13,8 +13,8 @@ const SignupEmail: React.FC = () => {
     password: "",
   });
 
-  const [isRegistered, setIsRegistered] = useState(false);  // state to control welcome message visibility
-  const [username, setUsername] = useState("");  // store the user's first name or full name
+  const [isRegistered, setIsRegistered] = useState(false); // state to control welcome message visibility
+  const [username, setUsername] = useState(""); // store the user's first name or full name
   const [showVerificationMessage, setShowVerificationMessage] = useState(false); // Show verification message after registration
 
   // Email validation regex
@@ -48,6 +48,8 @@ const SignupEmail: React.FC = () => {
   // Form validation before submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowVerificationMessage(false); // Clear previous messages
+    setIsRegistered(false);
 
     const unmetCriteria = checkPasswordCriteria(formData.password).filter((c) => !c.met);
     if (!formData.firstName || !formData.email) {
@@ -66,20 +68,30 @@ const SignupEmail: React.FC = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/auth/signup`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
-      if(response.ok) {
+      if (response.ok) {
         console.log("User data saved:", data);
+
+        // Store the token and user details in localStorage
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Automatically log the user in and redirect to homepage
         setUsername(formData.firstName);
         setIsRegistered(true);
         setShowVerificationMessage(true); // Show the verification message
+
         setTimeout(() => {
           navigate("/");  // Redirect to home after 3 seconds
         }, 3000);
+
+        // Dispatch event to notify other components of user update
+        window.dispatchEvent(new Event("userUpdated"));
       } else {
         alert(data.error || "Signup failed");
       }
@@ -207,7 +219,7 @@ const SignupEmail: React.FC = () => {
         {/* Display the success message if registered */}
         {isRegistered && showVerificationMessage && (
           <div className="mt-4 text-center text-green-500">
-            <p>Please check your email to verify your account.</p>
+            <p>Registration successful! You are now logged in and redirected to the homepage.</p>
           </div>
         )}
       </div>

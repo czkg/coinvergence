@@ -1,10 +1,10 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // New state to store error message
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -12,27 +12,28 @@ const Signin: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
+    setErrorMessage(""); // Clear previous error message
 
     try {
       const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/auth/signin`, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      if(response.ok) {
+
+      if (response.ok) {
+        // On success, store token and user data, then navigate
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         navigate("/");
-        //notify home page
-        window.dispatchEvent(new Event("userUpdated"));
+        window.dispatchEvent(new Event("userUpdated")); // Notify other components
       } else {
-        setErrorMessage(data.error);
+        setErrorMessage(data.error || "Invalid credentials. Please try again.");
       }
     } catch (error) {
-      setErrorMessage("Invalid credentials. Please try again.");
+      setErrorMessage("An error occurred. Please try again.");
       console.error("Login Error:", error);
     }
   };
@@ -51,17 +52,12 @@ const Signin: React.FC = () => {
           <p className="text-sm text-gray-600 mt-2">Use your email address or username to sign into your account</p>
         </div>
 
-        <div className="text-sm text-gray-600 mb-6">
-          <p>
-            If you are signing in for the first time since the 6th November, you must reset your password before you
-            will be able to continue.
-            <a className="text-red-600 underline" href="#"> Click here to reset your password.</a>
-          </p>
-        </div>
+        {/* Display the error message in red if there is an error */}
+        {errorMessage && <div className="text-red-600 text-center mb-4">{errorMessage}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Email/Username</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email/Username</label>
             <input
               type="text"
               name="email"
