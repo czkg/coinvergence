@@ -54,7 +54,7 @@ router.post(`/signup`, async (req, res): Promise<any> => {
     }
 });
 
-
+//TODO:verification
 // Node.js Express endpoint to verify the email token
 // router.get("/activate", async (req, res): Promise<any> => {
 //     const { token } = req.query;
@@ -75,8 +75,7 @@ router.post(`/signup`, async (req, res): Promise<any> => {
 //       return res.status(500).json({ error: "Error verifying email" });
 //     }
 // });
-  
-//signin
+
 //signin
 router.post(`/signin`, async (req, res): Promise<any> => {
     try {
