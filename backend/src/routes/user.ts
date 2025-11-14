@@ -8,7 +8,7 @@ import dotenv from "dotenv"
 dotenv.config();
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET || "czkg_coinvergence";
+const JWT_SECRET = process.env.JWT_SECRET!;
 const backend_domain = process.env.BACKEND_DOMAIN;
 
 //signup
