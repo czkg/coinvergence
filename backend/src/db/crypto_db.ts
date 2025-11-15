@@ -1,10 +1,17 @@
-import { Pool } from "pg"
-import dotenv from "dotenv"
+import { Pool } from "pg";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const crypto_DB = new Pool({
-    connectionString: process.env.DB_HOST,
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT),
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 export default crypto_DB;
