@@ -20,4 +20,19 @@ model User {
   lastName        String
   email           String    @unique
   hashedPassword  String
+
+  isVerified      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  tokens          EmailVerificationToken[]
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 }
