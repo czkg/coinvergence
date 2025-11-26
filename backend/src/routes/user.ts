@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import userDB from "../db/user_db"
 import { authenticateToken } from "../middleware/authMiddleware"
 import dotenv from "dotenv"
+import prisma from "../prisma";
 
 dotenv.config();
 
@@ -23,8 +24,10 @@ router.post(`/signup`, async (req, res): Promise<any> => {
         }
 
         // check if user already exists
-        const existingUser = await userDB.query("SELECT * FROM users WHERE email = $1", [email]);
-        if (existingUser.rows.length > 0) {
+        const existingUser = await prisma.user.findUnique({
+            where: { email },
+        });
+        if (existingUser) {
             return res.status(400).json({ error: "User already exists" });
         }
 
