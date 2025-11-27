@@ -4,7 +4,7 @@ import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import SignupEmail from "./pages/SignupEmail"
 import Signin from "./pages/Signin";
-import VerifiedPage from "./pages/VerifiedPage";
+import EmailVerify from "./pages/EmailVerify";
 
 const RouterWrapper: React.FC = () => {
   return (
@@ -12,9 +12,9 @@ const RouterWrapper: React.FC = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/signupEmail" element={<SignupEmail />}/>
+        <Route path="/signup-email" element={<SignupEmail />}/>
         <Route path="/signin" element={<Signin />} />
-        <Route path="/verified" element={<VerifiedPage />}/>
+        <Route path="/verify-email" element={<EmailVerify />}/>
       </Routes>
     </BrowserRouter>
   );

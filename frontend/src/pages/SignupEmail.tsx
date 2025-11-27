@@ -75,23 +75,7 @@ const SignupEmail: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("User data saved:", data);
-
-        // Store the token and user details in localStorage
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        // Automatically log the user in and redirect to homepage
-        setUsername(formData.firstName);
-        setIsRegistered(true);
-        setShowVerificationMessage(true); // Show the verification message
-
-        setTimeout(() => {
-          navigate("/");  // Redirect to home after 3 seconds
-        }, 3000);
-
-        // Dispatch event to notify other components of user update
-        window.dispatchEvent(new Event("userUpdated"));
+        navigate(`/verify-email?email=${formData.email}`);
       } else {
         alert(data.error || "Signup failed");
       }
@@ -99,8 +83,6 @@ const SignupEmail: React.FC = () => {
       console.error("Signup Error:", error);
       alert("An error occurred while signing up.");
     }
-
-    console.log("Form submitted:", formData);
   };
 
   return (

@@ -5,7 +5,7 @@ import cors from "cors"
 
 import { updateTopCryptos } from "./routes/crypto"
 import cryptoRoutes from "./routes/crypto"
-import authRoutes from "./routes/user"
+import authRoutes from "./routes/auth"
 
 
 const app = express();
