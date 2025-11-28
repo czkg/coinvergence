@@ -5,6 +5,8 @@ import userDB from "../db/user_db"
 import { authenticateToken } from "../middleware/authMiddleware"
 import dotenv from "dotenv"
 import prisma from "../prisma";
+import { AUTH_CONFIG } from "../config/authConfig";
+import { sendVerificationEmail } from "../utils/sendEmail";
 import { verify } from "crypto"
 
 dotenv.config();
@@ -69,7 +71,7 @@ router.post(`/signup`, async (req, res): Promise<any> => {
 
 
 // Node.js Express endpoint to verify the email token
-router.get("/verify-email", async (req, res): Promise<any> => {
+router.get(`/verify-email`, async (req, res): Promise<any> => {
     try {
         const token = req.query.token as string;
         if (!token) {
@@ -108,32 +110,89 @@ router.get("/verify-email", async (req, res): Promise<any> => {
 router.post(`/signin`, async (req, res): Promise<any> => {
     try {
         const { email, password } = req.body;
-        const user = await userDB.query("SELECT * FROM users WHERE email = $1", [email]);
+        const user = await prisma.user.findUnique({
+            where: { email },
+        });
 
-        if (user.rows.length === 0) {
-            return res.status(400).json({ error: "Invalid credentials" });
+        if (!user) {
+            return res.status(400).json({ error: "The email or password you entered is not correct" });
+        }
+
+        if (!user.isVerified) {
+            return res.status(400).json({ error: "Please verify your email before signing in" });
         }
 
         // Compare the hashed password
-        const isValidPassword = await bcrypt.compare(password, user.rows[0].password_hash);
+        const isValidPassword = await bcrypt.compare(password, user.passHash);
         if (!isValidPassword) {
-            return res.status(400).json({ error: "Invalid credentials" });
+            return res.status(400).json({ error: "The email or password you entered is not correct" });
         }
 
         // Create JWT token
-        const token = jwt.sign({ userId: user.rows[0].id, email }, JWT_SECRET, { expiresIn: "1h" });
+        const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: "1h" });
 
         // Remove sensitive data (like password_hash) from the user object
-        const { password_hash, ...userWithoutPassword } = user.rows[0]; 
+        const { passHash: _removed, ...safeUser } = user;  
 
         // Send response with the token and the user object (without password)
-        res.json({ message: "login successful", token, user: userWithoutPassword });
+        res.json({ message: "login successful", token, user: safeUser });
     } catch (error) {
         console.error("Error logging in:", error);
         res.status(500).json({ error: "Login failed" });
     }
 });
 
+// resend verification email
+router.post("/resend-verification", async (req, res): Promise<any> => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user) {
+        return res.status(400).json({ error: "User not found" });
+        }
+
+        if (user.isVerified) {
+        return res.status(400).json({ error: "User is already verified" });
+        }
+
+        // Generate new token
+        const token = crypto.randomUUID();
+
+        // Delete any old tokens for this user
+        await prisma.emailVerificationToken.deleteMany({
+          where: { userId: user.id },
+        });
+
+        // Create new token (valid for 1 hour)
+        await prisma.emailVerificationToken.create({
+          data: {
+            token,
+            userId: user.id,
+            expiresAt: new Date(Date.now() + AUTH_CONFIG.verificationTokenExpiresIn),
+          },
+        });
+
+        // Send new email
+        await sendVerificationEmail(email, token);
+
+        return res.json({
+          success: true,
+          message: "Verification email has been resent",
+        });
+
+    } catch (error) {
+        console.error("Resend verification error:", error);
+        return res.status(500).json({
+          error: "Server error while resending verification email",
+        });
+    }
+});
 
 //signout
 router.post(`/signout`, (req, res) => {
