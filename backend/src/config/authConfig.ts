@@ -6,7 +6,7 @@ export const AUTH_CONFIG = {
   deleteUnverifiedAfter: 30 * 24 * 60 * 60 * 1000,
 
   // JWT configs
-  jwtExpiresIn: "7d",
+  jwtExpiresIn: "7d" as const,
 
   // email sender
   mailFrom: "no-reply@coinvergence.net",

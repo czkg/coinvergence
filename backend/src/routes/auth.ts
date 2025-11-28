@@ -34,7 +34,13 @@ router.post(`/signup`, async (req, res): Promise<any> => {
             where: { email },
         });
         if (existingUser) {
-            return res.status(400).json({ error: "User already exists" });
+            if (!existingUser.isVerified) {
+                return res.status(400).json({ error: "User already exists but is not verified. Please check your email for the verification link." });
+            }   
+            return res.status(400).json({ 
+                error: "User already exists",
+                needsVerification: true,
+            });
         }
 
         // hash the password
@@ -51,17 +57,22 @@ router.post(`/signup`, async (req, res): Promise<any> => {
             },
         });
 
-        // generate token to verify email address
-        const verifyToken = jwt.sign({ userId: newUser.id, email }, JWT_SECRET, { expiresIn: "1h" });
-        const verifyUrl = `${backend_domain}/verify-email?token=${verifyToken}`;
+        // generate datebase token
+        const token = crypto.randomUUID();
+        await prisma.emailVerificationToken.create({
+          data: {
+            token,
+            userId: newUser.id,
+            expiresAt: new Date(Date.now() + AUTH_CONFIG.verificationTokenExpiresIn),
+          },
+        });
 
-        // send response with the token and user object (without password)
-        const { passHash: _removed, ...safeUser } = newUser; 
+        // send verification via SES
+        await sendVerificationEmail(newUser.email, token); 
 
         return res.status(201).json({
+            success: true,
             message: "User registered successfully. Please verify your email.",
-            verifyUrl,
-            user: safeUser, // Return user details excluding the password hash
         });
     } catch (error) {
         console.error("Error registering user:", error);
@@ -78,28 +89,46 @@ router.get(`/verify-email`, async (req, res): Promise<any> => {
             return res.status(400).json({ error: "Verification token is required" });
         }
 
-        let payload;
-        try {
-            payload = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
-        } catch (err) {
-            return res.status(400).json({ error: "Invalid or expired token" });
+        // look up token in database
+        const record = await prisma.emailVerificationToken.findUnique({
+          where: { token },
+          include: { user: true },
+        });
+
+        if (!record) {
+          return res.status(400).json({ error: "Invalid or expired verification link" });
         }
 
-        // chekc user existence
-        const user = await prisma.user.findUnique({
-            where: { id: payload.userId },
-        });
-        if (!user) {
-            return res.status(400).json({ error: "User not found" });
+        // check if token is expired
+        if (record.expiresAt < new Date()) {
+          return res.status(400).json({ error: "Verification link has expired" });
         }
 
         // update user's isVerified status
-        await prisma.user.update({
-            where: { id: payload.userId },
+        const updatedUser = await prisma.user.update({
+            where: { id: record.userId },
             data: { isVerified: true },
         });
 
-        res.json({ message: "Email verified successfully" });
+        await prisma.emailVerificationToken.delete({
+          where: { token },
+        });
+
+        // Generate authentication JWT (auto-login)
+        const jwtToken = jwt.sign({ id: updatedUser.id, email: updatedUser.email }, JWT_SECRET, { expiresIn: AUTH_CONFIG.jwtExpiresIn });
+
+        return res.json({
+            success: true,
+            message: "Email verified successfully",
+            token: jwtToken,
+            user: {
+                id: updatedUser.id,
+                email: updatedUser.email,
+                firstName: updatedUser.firstName,
+                lastName: updatedUser.lastName,
+            },
+        });
+        
     } catch (error) {
         console.error("VerifyEmail error:", error);
         return res.status(500).json({ error: "Server error" });

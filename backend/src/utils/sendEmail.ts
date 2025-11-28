@@ -38,7 +38,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
  * Send verification email
  */
 export async function sendVerificationEmail(email: string, token: string) {
-  const verifyUrl = `${process.env.FRONTEND_URL}/verified?token=${token}`;
+  const verifyUrl = `${process.env.FRONT_DOMAIN}/verified?token=${token}`;
 
   const subject = "Verify Your Coinvergence Account";
 

@@ -6,6 +6,7 @@ import cors from "cors"
 import { updateTopCryptos } from "./routes/crypto"
 import cryptoRoutes from "./routes/crypto"
 import authRoutes from "./routes/auth"
+import "./cron/cleanup";
 
 
 const app = express();
