@@ -15,7 +15,7 @@ router.get("/prices", async (req, res) => {
     const data = await prisma.cryptoPrice.findMany({
       take: limit,
       orderBy: {
-        price: "desc",  // SORT BY PRICE DESC (your requirement)
+        price: "desc",  // SORT BY PRICE DESC
       },
       include: {
         asset: true, // join CryptoAsset metadata
