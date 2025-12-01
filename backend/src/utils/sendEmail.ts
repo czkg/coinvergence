@@ -6,7 +6,7 @@ import { AUTH_CONFIG } from "../config/authConfig";
 
 // AWS SES client
 export const ses = new SESClient({
-  region: process.env.AWS_SES_REGION, // e.g. "us-east-1"
+  region: process.env.AWS_SES_REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY!,
     secretAccessKey: process.env.AWS_SECRET_KEY!,
