@@ -7,7 +7,7 @@ import cors from "cors";
 import cryptoRoutes from "./routes/crypto";
 import authRoutes from "./routes/auth";
 
-// Load cron jobs (they run automatically)
+// Load cron jobs (run automatically)
 import "./cron/updateCryptos";
 import "./cron/cleanup";
 
