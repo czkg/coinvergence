@@ -23,6 +23,12 @@ jobs:
           cd frontend
           npm ci
 
+      - name: Generate .env.production
+        run: |
+          cd frontend
+          echo "VITE_BACKEND_DOMAIN=https://api.coinvergence.net" > .env.production
+          echo "VITE_FRONT_DOMAIN=https://app.coinvergence.net" >> .env.production
+
       - name: Build project
         run: |
           cd frontend
