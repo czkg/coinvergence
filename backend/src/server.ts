@@ -1,42 +1,25 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 dotenv.config();
-import express from "express"
-import cors from "cors"
 
-import { updateTopCryptos } from "./routes/crypto"
-import cryptoRoutes from "./routes/crypto"
-import authRoutes from "./routes/auth"
+import express from "express";
+import cors from "cors";
+
+import cryptoRoutes from "./routes/crypto";
+import authRoutes from "./routes/auth";
+
+// Load cron jobs (they run automatically)
+import "./cron/updateCryptos";
 import "./cron/cleanup";
 
-
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-app.use(`/api/crypto`, cryptoRoutes);
-app.use(`/api/auth`, authRoutes);
+// Routes
+app.use("/api/crypto", cryptoRoutes);
+app.use("/api/auth", authRoutes);
 
-(async () => {
-    try {
-        console.log("Updating cryptos on server start...");
-        await updateTopCryptos();
-        console.log("Initial crypto prices updated.");
-    } catch (error) {
-        console.error("Error updating cryptos at startup:", error);
-    }
-})();
-
-const UPDATE_INTERVAL = 5 * 60 * 1000;
-setInterval(async () => {
-    try {
-        console.log("Scheduled crypto update started...");
-        await updateTopCryptos();
-        console.log("Crypto prices updated.");
-    } catch (error) {
-        console.error("Error updating cryptos:", error);
-    }
-}, UPDATE_INTERVAL);
-
-
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -14,6 +14,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User Information
 model User {
   id              String    @id @default(uuid())
   firstName       String    @map("first_name")
@@ -27,6 +28,7 @@ model User {
   tokens          EmailVerificationToken[]
 }
 
+// Token
 model EmailVerificationToken {
   id        String      @id @default(uuid())
   token     String      @unique
@@ -35,4 +37,49 @@ model EmailVerificationToken {
 
   userId    String      @map("user_id")
   user      User        @relation(fields: [userId], references: [id])
+}
+
+// Crypto
+model CryptoAsset {
+  id         String   @id @default(uuid())
+  symbol     String   @unique
+  name       String
+  coinId     String?  @unique
+  logoUrl    String?
+  createdAt  DateTime @default(now())
+
+  prices     CryptoPrice[]
+  ohlc       CryptoOHLC[]
+}
+
+// Crypto Price
+model CryptoPrice {
+  id        String   @id @default(uuid())
+  assetId   String
+  price     Decimal
+  marketCap Decimal?
+  volume24h Decimal?
+  change24h Decimal?
+  updatedAt DateTime @updatedAt
+
+  asset     CryptoAsset @relation(fields: [assetId], references: [id])
+
+  @@unique([assetId])
+}
+
+// Crypto History Price
+model CryptoOHLC {
+  id        String   @id @default(uuid())
+  assetId   String
+  interval  String
+  open      Decimal
+  high      Decimal
+  low       Decimal
+  close     Decimal
+  volume    Decimal
+  timestamp DateTime
+
+  asset     CryptoAsset @relation(fields: [assetId], references: [id])
+
+  @@unique([assetId, interval, timestamp])
 }

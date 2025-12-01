@@ -1,69 +1,55 @@
-import express from "express"
-import axios from "axios"
-import cors from "cors"
-import cryptoDB from "../db/crypto_db"
-import dotenv from "dotenv";
+import { Router } from "express";
+import prisma from "../prisma";
 
-dotenv.config();
+const router = Router();
 
-//update top cryptos
-export const updateTopCryptos = async () => {
-    try {
-        const response = await axios.get("https://api.coingecko.com/api/v3/coins/markets", {
-            params: {
-                vs_currency: "usd",
-                order: "market_cap_desc", //volume_desc
-                per_page: 100,
-                page: 1,
-                sparkline: false,
-            },
-        });
+/**
+ * GET /api/crypto/prices
+ * Return cryptos sorted by price DESC (your trending_cap logic)
+ */
+router.get("/prices", async (req, res) => {
+  try {
+    const limit = Number(req.query.limit) || 100;
 
-        const cryptos = response.data;
+    // Query latest prices with asset metadata
+    const data = await prisma.cryptoPrice.findMany({
+      take: limit,
+      orderBy: {
+        price: "desc",  // SORT BY PRICE DESC (your requirement)
+      },
+      include: {
+        asset: true, // join CryptoAsset metadata
+      },
+    });
 
-        for(const crypto of cryptos) {
-            const symbol = crypto.symbol.toUpperCase();
-            const price = crypto.current_price;
-
-            await cryptoDB.query(
-                `INSERT INTO crypto_prices (symbol, price, updated_at)
-                 VALUES ($1, $2, NOW())
-                 ON CONFLICT (symbol) DO UPDATE SET price = EXCLUDED.price, updated_at = NOW()`,
-                [symbol, price]
-              );              
-        }
-        console.log("Top 100 cryptos updated.")
-    } catch (error) {
-        console.error("Error updating top cryptos:", error);
+    if (data.length === 0) {
+      return res.status(404).json({ error: "No crypto data available" });
     }
-};
 
-//home_trending_cap
-const router = express.Router();
-router.get(`/trending_cap`, async (req, res): Promise<any> => {
-    try {
-        const limit = parseInt(req.query.limit as string) || 100;
-        await updateTopCryptos();
-        const result = await cryptoDB.query(
-            "SELECT symbol, price FROM crypto_prices ORDER BY price DESC LIMIT $1",
-            [limit]
-        );
-        if (result.rows.length === 0) {
-            return res.status(404).json({error: "No crypto data available"});
-        }
-        const formattedData = result.rows.map(row => ({
-            symbol: row.symbol,
-            price: parseFloat(row.price).toFixed(2),
-        }));
-        res.json(formattedData);
-    } catch (error) {
-        console.error("Error fetching top crypto:", error);
-        res.status(500).json({error: "Failed to fetch top crypto"});
-    }
+    // Format output for frontend
+    const formatted = data.map((row) => ({
+      symbol: row.asset.symbol,
+      name: row.asset.name,
+      logoUrl: row.asset.logoUrl,
+      price: Number(row.price),
+      marketCap: row.marketCap,
+      volume24h: row.volume24h,
+      change24h: row.change24h,
+      updatedAt: row.updatedAt,
+    }));
+
+    return res.json({
+      success: true,
+      count: formatted.length,
+      data: formatted,
+    });
+
+  } catch (err) {
+    console.error("Error fetching /prices:", err);
+    return res.status(500).json({
+      error: "Failed to fetch crypto prices",
+    });
+  }
 });
 
 export default router;
-//home_trending_volume
-
-
-
