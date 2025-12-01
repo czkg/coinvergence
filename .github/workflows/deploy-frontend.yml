@@ -30,6 +30,7 @@ jobs:
 
       - name: Deploy to S3
         run: |
+          cd frontend
           aws s3 sync dist/ s3://coinvergence-frontend --delete
           aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DISTRIBUTION_ID }} --paths "/*"
         env:
