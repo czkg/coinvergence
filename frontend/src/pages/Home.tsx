@@ -153,15 +153,15 @@ const Home: React.FC = () => {
         </div>
         <div className="flex justify-center space-x-16">
           <div className="text-center">
-            <img alt="Buy" className="mx-auto mb-2" src="./icons/buy.png" style={{ height: "60%" }} />
+            <img alt="Buy" className="mx-auto mb-2" src="/buy.png" style={{ height: "60%" }} />
             <p style={{ color: "#837D3D", fontSize: "32px" }}>Buy</p>
           </div>
           <div className="text-center">
-            <img alt="Wallet" className="mx-auto mb-2" src="./icons/wallet.png" style={{ height: "60%" }} />
+            <img alt="Wallet" className="mx-auto mb-2" src="/wallet.png" style={{ height: "60%" }} />
             <p style={{ color: "#837D3D", fontSize: "32px" }}>My Wallet</p>
           </div>
           <div className="text-center">
-            <img alt="Sell" className="mx-auto mb-2" src="./icons/sell.png" style={{ height: "60%" }} />
+            <img alt="Sell" className="mx-auto mb-2" src="/sell.png" style={{ height: "60%" }} />
             <p style={{ color: "#837D3D", fontSize: "32px" }}>Sell</p>
           </div>
         </div>
