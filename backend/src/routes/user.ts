@@ -7,6 +7,7 @@ import prisma from "../prisma";
 
 dotenv.config();
 
+// TODO
 // const router = express.Router();
 // if (!process.env.JWT_SECRET) {
 //     throw new Error("JWT_SECRET is not set");
