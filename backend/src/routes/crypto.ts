@@ -7,7 +7,7 @@ const router = Router();
  * GET /api/crypto/prices
  * Return cryptos sorted by price DESC (your trending_cap logic)
  */
-router.get("/prices", async (req, res) => {
+router.get("/prices", async (req, res): Promise<any> => {
   try {
     const limit = Number(req.query.limit) || 100;
 
