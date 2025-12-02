@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const EmailVerify: React.FC = () => {
+const VerifyEmail: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -110,4 +110,4 @@ const EmailVerify: React.FC = () => {
   );
 };
 
-export default EmailVerify;
+export default VerifyEmail;

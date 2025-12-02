@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "EmailVerificationToken" ADD COLUMN     "sent_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
