@@ -66,7 +66,7 @@ const SignupEmail: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/auth/signup`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/auth/signup-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

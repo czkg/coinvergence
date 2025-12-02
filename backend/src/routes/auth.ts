@@ -17,7 +17,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const backend_domain = process.env.BACKEND_DOMAIN;
 
 //signup
-router.post(`/signup`, async (req, res): Promise<any> => {
+router.post(`/signup-email`, async (req, res): Promise<any> => {
     try {
         const { firstName, lastName, email, password } = req.body;
 
