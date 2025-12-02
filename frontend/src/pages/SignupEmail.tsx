@@ -75,7 +75,7 @@ const SignupEmail: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        navigate(`/verify-email?email=${formData.email}`);
+        navigate(`/check-your-email?email=${formData.email}`);
       } else {
         alert(data.error || "Signup failed");
       }

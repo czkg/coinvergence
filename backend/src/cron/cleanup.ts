@@ -17,7 +17,7 @@ cron.schedule(CLEAN_INTERVAL, async () => {
     },
   });
 
-  // 2. Delete unverified users older than X days
+  // 2. Delete unverified users older than 30 days
   await prisma.user.deleteMany({
     where: {
       isVerified: false,

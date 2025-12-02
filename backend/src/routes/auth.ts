@@ -133,6 +133,68 @@ router.get(`/verify-email`, async (req, res): Promise<any> => {
     }
 });
 
+// resend verification email
+router.post("/resend-verification", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required." });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({ error: "User is already verified." });
+    }
+
+    // 1. Find existing token for this user
+    const existingToken = await prisma.emailVerificationToken.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" }
+    });
+
+    const now = new Date();
+
+    // 2. Check rate limit — less than 60 seconds?
+    if (existingToken) {
+      const diffSec = (now.getTime() - existingToken.sentAt.getTime()) / 1000;
+
+      if (diffSec < 60) {
+        return res.status(429).json({
+          error: `Please wait ${Math.ceil(60 - diffSec)} seconds before resending verification email.`
+        });
+      }
+    }
+
+    // 3. Create a new token
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + AUTH_CONFIG.verificationTokenExpiresIn);
+
+    await prisma.emailVerificationToken.create({
+      data: {
+        token,
+        userId: user.id,
+        expiresAt,
+        sentAt: new Date()
+      }
+    });
+
+    // 4. Send email
+    await sendVerificationEmail(email, token);
+
+    return res.json({ success: true });
+
+  } catch (err) {
+    console.error("Resend Verification Error:", err);
+    return res.status(500).json({ error: "Server error." });
+  }
+});
+
 //signin
 router.post(`/signin`, async (req, res): Promise<any> => {
     try {

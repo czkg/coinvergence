@@ -62,7 +62,7 @@ const EmailVerify: React.FC = () => {
       <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md w-full">
         {/* Logo */}
         <img
-          src="/logo.png"
+          src="/icons/logo.png"
           alt="Coinvergence Logo"
           className="h-16 mx-auto mb-4 cursor-pointer"
           onClick={() => navigate("/")}
