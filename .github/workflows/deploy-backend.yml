@@ -21,9 +21,27 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
+
+            # Go to backend folder
             cd /home/ubuntu/coinvergence/backend
-            git pull
-            npm install
+
+            # Clean local changes (prevent git pull failure)
+            git reset --hard HEAD
+            git clean -fd
+
+            # Pull latest code
+            git pull origin main
+
+            # Install deps strictly according to lockfile
+            npm ci
+
+            # Build TypeScript
             npm run build
-            pm2 restart coinvergence-api
+
+            # Start or Restart PM2 safely
+            pm2 restart coinvergence-api || pm2 start dist/server.js --name coinvergence-api
+
+            # Persist PM2 process
+            pm2 save
+
           EOF
