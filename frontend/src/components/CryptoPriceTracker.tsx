@@ -11,9 +11,10 @@ const CryptoPriceTracker: React.FC<CryptoPriceTrackerProps> = ({ display_id }) =
         const fetchTopCrypto = async () => {
             try {
                 const response = await fetch(`${import.meta.env.VITE_BACKEND_DOMAIN}/api/crypto/prices`);
-                const data = await response.json();
-                
-                if (data.length >= display_id) {
+                const json = await response.json();
+                const data = json.data;
+
+                if (Array.isArray(data) && data.length >= display_id) {
                     setCryptoSymbol(data[display_id - 1].symbol);
                     setCryptoPrice(data[display_id - 1].price);
                 } else {
