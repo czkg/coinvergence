@@ -134,7 +134,7 @@ router.get(`/verify-email`, async (req, res): Promise<any> => {
 });
 
 // resend verification email
-router.post("/resend-verification", async (req, res) => {
+router.post("/resend-verification", async (req, res): Promise<any> => {
   try {
     const { email } = req.body;
 
