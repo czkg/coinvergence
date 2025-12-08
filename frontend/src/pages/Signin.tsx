@@ -5,6 +5,7 @@ const Signin: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState(""); // New state to store error message
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -41,7 +42,7 @@ const Signin: React.FC = () => {
   return (
     <div className="bg-gray-100 flex items-center justify-center min-h-screen">
       <img
-        src="/logo.png"
+        src="/icons/logo.png"
         alt="Coinvergence Logo"
         className="absolute top-6 left-6 h-auto w-28 sm:w-36 md:w-44 lg:w-52 xl:w-60 object-contain cursor-pointer"
         onClick={() => navigate("/")}
@@ -72,7 +73,7 @@ const Signin: React.FC = () => {
           <div className="mb-4 relative">
             <label className="block text-sm font-medium text-gray-700">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
               placeholder="Enter your password"
@@ -80,7 +81,13 @@ const Signin: React.FC = () => {
               onChange={handleChange}
               required
             />
-            <i className="fas fa-eye absolute right-3 top-3 text-gray-500 cursor-pointer"></i>
+
+            <i
+              className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"} 
+                absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 cursor-pointer`}
+              onClick={() => setShowPassword(!showPassword)}
+            ></i>
+
           </div>
 
           <div className="text-right mb-6">

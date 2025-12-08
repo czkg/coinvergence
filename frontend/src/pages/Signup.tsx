@@ -7,7 +7,7 @@ const Signup: React.FC = () => {
   return (
     <div className="bg-gray-100 flex items-center justify-center min-h-screen">
       <img
-        src="/logo.png"
+        src="/icons/logo.png"
         alt="Coinvergence Logo"
         className="absolute top-6 left-6 h-auto w-28 sm:w-36 md:w-44 lg:w-52 xl:w-60 object-contain cursor-pointer"
         onClick={() => navigate("/")}

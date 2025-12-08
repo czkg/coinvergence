@@ -89,7 +89,7 @@ const SignupEmail: React.FC = () => {
     <div className="bg-gray-100 flex flex-col items-center justify-center min-h-screen relative">
       {/* Clickable Logo to Navigate Home */}
       <img
-        src="/logo.png"
+        src="/icons/logo.png"
         alt="Coinvergence Logo"
         className="absolute top-6 left-6 h-auto w-32 sm:w-40 md:w-48 lg:w-56 xl:w-64 object-contain cursor-pointer"
         onClick={() => navigate("/")}
