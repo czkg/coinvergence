@@ -22,8 +22,8 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'EOF'
 
-            # Go to backend folder
-            cd /home/ubuntu/coinvergence/backend
+            # Go to backend-api folder
+            cd /home/ubuntu/coinvergence/backend-api
 
             # Clean local changes (prevent git pull failure)
             git reset --hard HEAD
