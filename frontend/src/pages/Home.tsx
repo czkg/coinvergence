@@ -76,7 +76,7 @@ const Home: React.FC = () => {
         <div className="relative" ref={dropdownRef}>
           {/* Clickable wrapper for mobile touch */}
           <div
-            className="cursor-pointer p-1 sm:p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 flex items-center justify-center"
+            className="cursor-pointer p-1 sm:p-2 rounded-full active:bg-gray-200 flex items-center justify-center"
             onClick={toggleDropdown}
           >
             <img
