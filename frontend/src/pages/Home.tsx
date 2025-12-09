@@ -74,12 +74,17 @@ const Home: React.FC = () => {
 
         {/* User Logo (Upper Right) with Dropdown */}
         <div className="relative" ref={dropdownRef}>
-          <img
-            src="/icons/user-icon.png" // User icon for dropdown
-            alt="User"
-            className="w-8 h-8 sm:w-10 sm:h-10 cursor-pointer"
+          {/* Clickable wrapper for mobile touch */}
+          <div
+            className="cursor-pointer p-1 sm:p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 flex items-center justify-center"
             onClick={toggleDropdown}
-          />
+          >
+            <img
+              src="/icons/user-icon.png"
+              alt="User"
+              className="w-8 h-8 sm:w-10 sm:h-10"
+            />
+          </div>
 
           {/* Dropdown Menu */}
           {dropdownOpen && (
