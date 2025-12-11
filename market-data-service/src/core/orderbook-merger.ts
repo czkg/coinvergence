@@ -47,11 +47,11 @@ export class OrderBookMerger {
     asks: [number, number][];
   } {
     const bidsArray = Object.entries(this.bids)
-      .map(([p, s]) => [parseFloat(p), s])
+      .map(([p, s]) => [parseFloat(p), s] as [number, number])
       .sort((a, b) => b[0] - a[0]);
 
     const asksArray = Object.entries(this.asks)
-      .map(([p, s]) => [parseFloat(p), s])
+      .map(([p, s]) => [parseFloat(p), s] as [number, number])
       .sort((a, b) => a[0] - b[0]);
 
     return { bids: bidsArray, asks: asksArray };

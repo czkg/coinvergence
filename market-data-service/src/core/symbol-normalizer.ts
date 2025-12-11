@@ -5,7 +5,7 @@
  *      XBT/USD → BTC-USD
  */
 export function normalizeSymbol(exchange: string, raw: string): string {
-  const map = {
+  const map: Record<string, string> = {
     XBT: "BTC",
     USDT: "USD",
     USD: "USD",
