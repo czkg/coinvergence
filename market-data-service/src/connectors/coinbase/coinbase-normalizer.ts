@@ -54,8 +54,8 @@ export function normalizeCoinbaseUpdate(raw: any): UnifiedMarketData[] | null {
     const askDiffs: [number, number][] = [];
 
     for (const [side, price, size] of raw.changes) {
-      const p = parseFloat(price);
-      const s = parseFloat(size);
+      const p = Number(price);
+      const s = Number(size);
 
       if (side === "buy") bidDiffs.push([p, s]);
       else askDiffs.push([p, s]);
