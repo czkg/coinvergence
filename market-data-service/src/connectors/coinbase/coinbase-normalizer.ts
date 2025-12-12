@@ -25,8 +25,8 @@ export function normalizeCoinbaseUpdate(raw: any): UnifiedMarketData[] | null {
    * SNAPSHOT
    * ------------------------------*/
   if (raw.type === "snapshot") {
-    const bids = raw.bids.map(([p, s]: any) => [parseFloat(p), parseFloat(s)]);
-    const asks = raw.asks.map(([p, s]: any) => [parseFloat(p), parseFloat(s)]);
+    const bids = raw.bids.map(([p, s]: any) => [Number(p), Number(s)]);
+    const asks = raw.asks.map(([p, s]: any) => [Number(p), Number(s)]);
 
     merger.applySnapshot({ bids, asks });
 

@@ -43,8 +43,8 @@ export function normalizeKrakenMessage(msg: any): NormalizedOrderBookUpdate | nu
    * SNAPSHOT
    * ------------------------------ */
   if (data.as || data.bs) {
-    const asks = (data.as ?? []).map(([p, s]: any) => [parseFloat(p), parseFloat(s)]);
-    const bids = (data.bs ?? []).map(([p, s]: any) => [parseFloat(p), parseFloat(s)]);
+    const asks = (data.as ?? []).map(([p, s]: any) => [Number(p), Number(s)]);
+    const bids = (data.bs ?? []).map(([p, s]: any) => [Number(p), Number(s)]);
 
     ob.applySnapshot({ bids, asks });
 
@@ -66,8 +66,8 @@ export function normalizeKrakenMessage(msg: any): NormalizedOrderBookUpdate | nu
    * DIFF
    * ------------------------------ */
   if (data.a || data.b) {
-    const askDiffs = (data.a ?? []).map(([p, s]: any) => [parseFloat(p), parseFloat(s)]);
-    const bidDiffs = (data.b ?? []).map(([p, s]: any) => [parseFloat(p), parseFloat(s)]);
+    const askDiffs = (data.a ?? []).map(([p, s]: any) => [Number(p), Number(s)]);
+    const bidDiffs = (data.b ?? []).map(([p, s]: any) => [Number(p), Number(s)]);
 
     ob.applyDiff({
       bids: bidDiffs,
