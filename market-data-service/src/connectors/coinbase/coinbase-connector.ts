@@ -1,6 +1,7 @@
 import WebSocket from "ws";
-import { normalizeCoinbaseUpdate } from "./coinbase-normalizer";
 import { marketDataEmitter } from "../../core/market-data-emitter";
+import { normalizeCoinbaseOrderBook } from "./coinbase-orderbook-normalizer";
+import { normalizeCoinbaseTrade } from "./coinbase-trade-normalizer";
 
 export class CoinbaseConnector {
   private ws: WebSocket | null = null;
@@ -14,20 +15,40 @@ export class CoinbaseConnector {
     this.ws.on("open", () => {
       console.log("[Coinbase] connected");
 
-      this.ws!.send(JSON.stringify({
-        type: "subscribe",
-        product_ids: this.symbols,
-        channels: ["level2"]
-      }));
+      this.ws!.send(
+        JSON.stringify({
+          type: "subscribe",
+          product_ids: this.symbols,
+          channels: [
+            "level2",  // orderbook
+            "matches", // trades
+          ],
+        })
+      );
     });
 
     this.ws.on("message", (msg) => {
-      const raw = JSON.parse(msg.toString());
+      try {
+        const raw = JSON.parse(msg.toString());
 
-      const events = normalizeCoinbaseUpdate(raw);
-      if (!events) return;
+        // -----------------------------
+        // ORDERBOOK (snapshot + l2update)
+        // -----------------------------
+        const ob = normalizeCoinbaseOrderBook(raw);
+        if (ob) {
+          marketDataEmitter.emit(ob);
+        }
 
-      events.forEach(event => marketDataEmitter.emit(event));
+        // -----------------------------
+        // TRADE (match)
+        // -----------------------------
+        const trade = normalizeCoinbaseTrade(raw);
+        if (trade) {
+          marketDataEmitter.emit(trade);
+        }
+      } catch (err) {
+        console.error("[Coinbase] parse error:", err);
+      }
     });
 
     this.ws.on("close", () => {

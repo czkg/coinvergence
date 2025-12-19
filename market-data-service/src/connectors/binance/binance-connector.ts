@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { marketDataEmitter } from "../../core/market-data-emitter";
-import { normalizeBinanceDepth } from "./binance-normalizer";
-import { normalizeSymbol } from "../../core/symbol-normalizer";
+import { normalizeBinanceOrderBook } from "./binance-orderbook-normalizer";
+import { normalizeBinanceTrade } from "./binance-trade-normalizer";
 
 export class BinanceConnector {
   constructor(private symbols: readonly string[]) {}
@@ -12,34 +12,68 @@ export class BinanceConnector {
     this.symbols.forEach((sym) => {
       const binanceSymbol = sym.replace("-", "").toLowerCase(); // BTC-USD → btcusd
 
-      const url = `wss://stream.binance.com:9443/ws/${binanceSymbol}@depth`;
+      // -----------------------------
+      // ORDERBOOK (depth)
+      // -----------------------------
+      const depthUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol}@depth`;
+      const depthWs = new WebSocket(depthUrl);
 
-      const ws = new WebSocket(url);
-
-      ws.on("open", () => {
-        console.log(`[Binance] connected: ${sym}`);
+      depthWs.on("open", () => {
+        console.log(`[Binance] depth connected: ${sym}`);
       });
 
-      ws.on("message", (msg) => {
+      depthWs.on("message", (msg) => {
         try {
           const raw = JSON.parse(msg.toString());
-          const unified = normalizeBinanceDepth(raw, sym);
+          const unified = normalizeBinanceOrderBook(raw, sym);
 
           if (unified) {
             marketDataEmitter.emit(unified);
           }
         } catch (err) {
-          console.error("[Binance] parse error:", err);
+          console.error("[Binance] depth parse error:", err);
         }
       });
 
-      ws.on("close", () => {
-        console.log("[Binance] closed, reconnecting...");
+      depthWs.on("close", () => {
+        console.log(`[Binance] depth closed (${sym}), reconnecting...`);
         setTimeout(() => this.connect(), 2000);
       });
 
-      ws.on("error", (err) => {
-        console.error("[Binance] ws error:", err);
+      depthWs.on("error", (err) => {
+        console.error(`[Binance] depth ws error (${sym}):`, err);
+      });
+
+      // -----------------------------
+      // TRADE
+      // -----------------------------
+      const tradeUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol}@trade`;
+      const tradeWs = new WebSocket(tradeUrl);
+
+      tradeWs.on("open", () => {
+        console.log(`[Binance] trade connected: ${sym}`);
+      });
+
+      tradeWs.on("message", (msg) => {
+        try {
+          const raw = JSON.parse(msg.toString());
+          const trade = normalizeBinanceTrade(raw);
+
+          if (trade) {
+            marketDataEmitter.emit(trade);
+          }
+        } catch (err) {
+          console.error("[Binance] trade parse error:", err);
+        }
+      });
+
+      tradeWs.on("close", () => {
+        console.log(`[Binance] trade closed (${sym}), reconnecting...`);
+        setTimeout(() => this.connect(), 2000);
+      });
+
+      tradeWs.on("error", (err) => {
+        console.error(`[Binance] trade ws error (${sym}):`, err);
       });
     });
   }

@@ -1,6 +1,7 @@
 import WebSocket from "ws";
-import { normalizeKrakenMessage } from "./kraken-normalizer";
 import { marketDataEmitter } from "../../core/market-data-emitter";
+import { normalizeKrakenOrderBook } from "./kraken-orderbook-normalizer";
+import { normalizeKrakenTrade } from "./kraken-trade-normalizer";
 
 export class KrakenConnector {
   private ws: WebSocket | null = null;
@@ -14,20 +15,47 @@ export class KrakenConnector {
     this.ws.on("open", () => {
       console.log("[Kraken] connected");
 
-      this.ws!.send(JSON.stringify({
-        event: "subscribe",
-        pair: this.symbols,
-        subscription: { name: "book", depth: 100 }
-      }));
+      // -----------------------------
+      // ORDERBOOK
+      // -----------------------------
+      this.ws!.send(
+        JSON.stringify({
+          event: "subscribe",
+          pair: this.symbols,
+          subscription: { name: "book", depth: 100 }
+        })
+      );
+
+      // -----------------------------
+      // TRADE
+      // -----------------------------
+      this.ws!.send(
+        JSON.stringify({
+          event: "subscribe",
+          pair: this.symbols,
+          subscription: { name: "trade" }
+        })
+      );
     });
 
     this.ws.on("message", (msg) => {
       try {
         const json = JSON.parse(msg.toString());
-        const unified = normalizeKrakenMessage(json);
 
-        if (unified) {
-          marketDataEmitter.emit(unified);
+        // -----------------------------
+        // ORDERBOOK
+        // -----------------------------
+        const ob = normalizeKrakenOrderBook(json);
+        if (ob) {
+          marketDataEmitter.emit(ob);
+        }
+
+        // -----------------------------
+        // TRADE (may be multiple)
+        // -----------------------------
+        const trades = normalizeKrakenTrade(json);
+        if (trades) {
+          trades.forEach(trade => marketDataEmitter.emit(trade));
         }
       } catch (err) {
         console.error("[Kraken] parse error:", err);
