@@ -1,8 +1,10 @@
 {
   "dependencies": {
+    "@clickhouse/client": "^1.15.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "@types/node": "^25.0.3",
     "@types/ws": "^8.18.1"
   }
 }
