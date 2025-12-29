@@ -43,7 +43,6 @@ export class ClickHouseBatcher {
     try {
       await this.opts.insert(batch);
     } catch (e) {
-      // 老派务实：失败了先把数据放回去，宁可重复写也别丢（后面我们再加去重策略）
       this.buf = batch.concat(this.buf);
       console.error(`[CH][${this.opts.name}] insert failed, buffered=${this.buf.length}`, e);
     } finally {
