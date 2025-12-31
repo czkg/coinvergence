@@ -7,10 +7,12 @@ export class ClickHouseBatcher {
 
   constructor(
     private readonly opts: {
+      name: string;
       maxRows: number;
       flushIntervalMs: number;
       insert: (rows: InsertRow[]) => Promise<void>;
-      name: string;
+      onFlush?: (rows: number, ms: number) => void;
+      onError?: (err: unknown) => void;
     }
   ) {}
 
@@ -33,20 +35,24 @@ export class ClickHouseBatcher {
   }
 
   async flush() {
-    if (this.flushing) return;
-    if (this.buf.length === 0) return;
+    if (this.flushing || this.buf.length === 0) return;
 
     this.flushing = true;
     const batch = this.buf;
     this.buf = [];
 
+    const t0 = Date.now();
     try {
       await this.opts.insert(batch);
-    } catch (e) {
-      this.buf = batch.concat(this.buf);
-      console.error(`[CH][${this.opts.name}] insert failed, buffered=${this.buf.length}`, e);
+      this.opts.onFlush?.(batch.length, Date.now() - t0);
+    } catch (err) {
+      this.opts.onError?.(err);
     } finally {
       this.flushing = false;
     }
+  }
+
+  size() {
+    return this.buf.length;
   }
 }
