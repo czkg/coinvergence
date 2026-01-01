@@ -1,6 +1,6 @@
 import { ClickHouseClient } from "@clickhouse/client";
 import { ClickHouseBatcher } from "./batcher";
-import type { NormalizedTrade } from "../../../../shared/types/unified-market-data";
+import type { NormalizedTrade } from "@shared/types/unified-market-data";
 
 function toCHDateTime64ms(ms: number) {
   const d = new Date(ms);

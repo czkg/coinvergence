@@ -1,4 +1,4 @@
-import { UnifiedMarketData } from "../../../shared/types/unified-market-data";
+import { UnifiedMarketData } from "@shared/types/unified-market-data";
 
 type MarketDataHandler = (data: UnifiedMarketData) => void | Promise<void>;
 

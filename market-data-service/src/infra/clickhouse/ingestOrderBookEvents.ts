@@ -1,22 +1,22 @@
 import { ClickHouseClient } from "@clickhouse/client";
 import { ClickHouseBatcher } from "./batcher";
-import type { NormalizedQuote } from "@shared/types/unified-market-data";
+import type { NormalizedOrderBookUpdate } from "@shared/types/unified-market-data";
 
 function toCHDateTime64ms(ms: number) {
   const d = new Date(ms);
   return d.toISOString().replace("T", " ").replace("Z", "");
 }
 
-export function createQuotesIngestor(ch: ClickHouseClient) {
+export function createOrderBookEventsIngestor(ch: ClickHouseClient) {
   const batcher = new ClickHouseBatcher({
-    name: "quotes",
+    name: "orderbook_events",
 
-    maxRows: 1000,
+    maxRows: 200,
     flushIntervalMs: 50,
 
     insert: async (rows) => {
       await ch.insert({
-        table: "quotes",
+        table: "orderbook_events",
         format: "JSONEachRow",
         values: rows,
       });
@@ -26,19 +26,19 @@ export function createQuotesIngestor(ch: ClickHouseClient) {
   batcher.start();
 
   return {
-    ingest(quote: NormalizedQuote) {
+    ingest(event: NormalizedOrderBookUpdate) {
       batcher.push({
-        exchange: quote.exchange,
-        symbol: quote.symbol,
+        exchange: event.exchange,
+        symbol: event.symbol,
 
-        ts_event: toCHDateTime64ms(quote.ts_event),
-        ts_recv: toCHDateTime64ms(quote.ts_recv),
+        ts_event: toCHDateTime64ms(event.ts_event),
+        ts_recv: toCHDateTime64ms(event.ts_recv),
 
-        bid: quote.bid,
-        bid_size: quote.bidSize,
+        snapshot: event.snapshot ? 1 : 0,
 
-        ask: quote.ask,
-        ask_size: quote.askSize,
+        // ClickHouse Array(Tuple(Float64, Float64))
+        bids: event.bids,
+        asks: event.asks,
       });
     },
 
