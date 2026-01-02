@@ -1,4 +1,4 @@
-import { NormalizedTrade } from "../../../../shared/types/unified-market-data";
+import { NormalizedTrade } from "@shared/types/unified-market-data";
 
 /**
  * Normalize Coinbase trade (match) events.

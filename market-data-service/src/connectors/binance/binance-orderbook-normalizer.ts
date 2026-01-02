@@ -1,4 +1,4 @@
-import { NormalizedOrderBookUpdate } from "../../../../shared/types/unified-market-data";
+import { NormalizedOrderBookUpdate } from "@shared/types/unified-market-data";
 
 /**
  * Normalize Binance depth diff (bids/asks).

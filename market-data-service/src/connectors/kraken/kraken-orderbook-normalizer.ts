@@ -1,4 +1,4 @@
-import { NormalizedOrderBookUpdate } from "../../../../shared/types/unified-market-data";
+import { NormalizedOrderBookUpdate } from "@shared/types/unified-market-data";
 import { OrderBookMerger } from "../../core/orderbook-merger";
 import { normalizeSymbol } from "../../core/symbol-normalizer";
 

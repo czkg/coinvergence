@@ -15,7 +15,7 @@ export class BinanceConnector {
       // -----------------------------
       // ORDERBOOK (depth)
       // -----------------------------
-      const depthUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol}@depth`;
+      const depthUrl = `wss://stream.binance.us:9443/ws/${binanceSymbol}@depth`;
       const depthWs = new WebSocket(depthUrl);
 
       depthWs.on("open", () => {
@@ -47,7 +47,7 @@ export class BinanceConnector {
       // -----------------------------
       // TRADE
       // -----------------------------
-      const tradeUrl = `wss://stream.binance.com:9443/ws/${binanceSymbol}@trade`;
+      const tradeUrl = `wss://stream.binance.us:9443/ws/${binanceSymbol}@trade`;
       const tradeWs = new WebSocket(tradeUrl);
 
       tradeWs.on("open", () => {
