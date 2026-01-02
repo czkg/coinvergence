@@ -44,24 +44,11 @@ export class ClickHouseBatcher {
 
     const t0 = Date.now();
 
-    console.log(
-      `[ClickHouseBatcher:${this.opts.name}] flushing ${batch.length} rows`
-    );
-
     try {
       await this.opts.insert(batch);
 
-      console.log(
-        `[ClickHouseBatcher:${this.opts.name}] insert success (${Date.now() - t0} ms)`
-      );
-
       this.opts.onFlush?.(batch.length, Date.now() - t0);
     } catch (err) {
-      console.error(
-        `[ClickHouseBatcher:${this.opts.name}] insert FAILED`,
-        err
-      );
-
       this.opts.onError?.(err);
     } finally {
       this.flushing = false;
