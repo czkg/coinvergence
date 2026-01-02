@@ -1,72 +1,65 @@
 /**
  * One-off runner for real market data ingestion.
  *
- * Purpose:
- * - Single exchange
- * - Single symbol
- * - Real websocket
- * - Real persistence
+ * Binance → MarketDataEmitter → ingestTrades → ClickHouse
  *
- * NOT production main.
+ * Assumptions (IMPORTANT):
+ * - MarketDataEmitter emits UnifiedMarketData with `type` field
+ * - trade events have: type === "trade"
+ * - orderbook events are ignored in this runner
  */
 
 import { BinanceConnector } from "../connectors/binance/binance-connector";
+import { marketDataEmitter } from "../core/market-data-emitter";
+import { createTradesIngestor } from "../infra/clickhouse/ingestTrades";
+import { createCH } from "../infra/clickhouse/client";
+import type { UnifiedMarketData } from "@shared/types/unified-market-data";
 
 const SYMBOL = "BTCUSDT";
 
 async function main() {
   console.log("[Runner] starting Binance BTCUSDT ingestion");
 
+  // 1️⃣ Create ClickHouse client
+  const ch = createCH();
+
+  // 2️⃣ Create trade ingestor (starts batcher internally)
+  const tradesIngestor = createTradesIngestor(ch);
+
+  // 3️⃣ 🔥 WIRING: UnifiedMarketData → trade-only ingestion
+  const unsubscribe = marketDataEmitter.subscribe(
+    (event: UnifiedMarketData) => {
+      if (event.type !== "trade") return;
+
+      console.log("[Runner] trade event received");
+      tradesIngestor.ingest(event);
+    }
+  );
+
+  console.log("[Runner] trade ingestor subscribed");
+
+  // 4️⃣ Start Binance connector
   const connector = new BinanceConnector([SYMBOL]);
 
-  // ---- optional but STRONGLY recommended ----
-  // If your connector exposes hooks / events, log them.
-  // This saves you hours of guessing.
-  if ("on" in connector) {
-    // @ts-ignore
-    connector.on("connected", () => {
-      console.log("[Runner] websocket connected");
-    });
-
-    // @ts-ignore
-    connector.on("disconnected", (reason: any) => {
-      console.warn("[Runner] websocket disconnected", reason);
-    });
-
-    // @ts-ignore
-    connector.on("error", (err: any) => {
-      console.error("[Runner] connector error", err);
-    });
-  }
-
-  // ---- start streaming ----
   await connector.connect();
-
   console.log("[Runner] connector.connect() called");
 
-  // ---- keep process alive intentionally ----
-  // This is a runner, not a service.
-  // Let Node stay up as long as websockets are alive.
-  process.on("SIGINT", shutdown);
-  process.on("SIGTERM", shutdown);
-}
+  // 5️⃣ Graceful shutdown
+  async function shutdown() {
+    console.log("[Runner] shutting down...");
 
-let shuttingDown = false;
+    unsubscribe();
 
-async function shutdown() {
-  if (shuttingDown) return;
-  shuttingDown = true;
+    // Flush remaining rows
+    await tradesIngestor.flush();
+    tradesIngestor.stop();
 
-  console.log("[Runner] shutting down...");
-
-  // If you have a close / disconnect API, call it here
-  // await connector.disconnect()
-
-  // Give async flushers (ClickHouse batchers) time to finish
-  setTimeout(() => {
     console.log("[Runner] exit");
     process.exit(0);
-  }, 1000);
+  }
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
 main().catch((err) => {
