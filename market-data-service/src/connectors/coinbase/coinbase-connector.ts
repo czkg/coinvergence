@@ -13,7 +13,7 @@ export class CoinbaseConnector {
     this.ws = new WebSocket(url);
 
     this.ws.on("open", () => {
-      console.log("[Coinbase] connected");
+      console.log("[Coinbase] websocket connected");
 
       this.ws!.send(
         JSON.stringify({
@@ -31,17 +31,36 @@ export class CoinbaseConnector {
       try {
         const raw = JSON.parse(msg.toString());
 
-        // -----------------------------
+        // --------------------------------------------------
+        // SUBSCRIPTION CONFIRMATION (equivalent to Binance ws open)
+        // --------------------------------------------------
+        if (raw.type === "subscriptions") {
+          for (const ch of raw.channels ?? []) {
+            if (ch.name === "level2") {
+              console.log(
+                `[Coinbase] orderbook connected: ${ch.product_ids.join(", ")}`
+              );
+            }
+            if (ch.name === "matches") {
+              console.log(
+                `[Coinbase] trade connected: ${ch.product_ids.join(", ")}`
+              );
+            }
+          }
+          return;
+        }
+
+        // --------------------------------------------------
         // ORDERBOOK (snapshot + l2update)
-        // -----------------------------
+        // --------------------------------------------------
         const ob = normalizeCoinbaseOrderBook(raw);
         if (ob) {
           marketDataEmitter.emit(ob);
         }
 
-        // -----------------------------
+        // --------------------------------------------------
         // TRADE (match)
-        // -----------------------------
+        // --------------------------------------------------
         const trade = normalizeCoinbaseTrade(raw);
         if (trade) {
           marketDataEmitter.emit(trade);
@@ -52,7 +71,7 @@ export class CoinbaseConnector {
     });
 
     this.ws.on("close", () => {
-      console.log("[Coinbase] closed, reconnecting...");
+      console.log("[Coinbase] websocket closed, reconnecting...");
       setTimeout(() => this.connect(), 2000);
     });
 

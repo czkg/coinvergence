@@ -1,25 +1,32 @@
-import { createCH } from "./infra/clickhouse/client";
+// src/main.ts
 
 import { marketDataEmitter } from "./core/market-data-emitter";
 
+import { createCH } from "./infra/clickhouse/client";
 import { createTradesIngestor } from "./infra/clickhouse/ingestTrades";
 import { createOrderBookEventsIngestor } from "./infra/clickhouse/ingestOrderBookEvents";
 import { createOrderBookLevelsIngestor } from "./infra/clickhouse/ingestOrderBookLevels";
 
 import { BinanceConnector } from "./connectors/binance/binance-connector";
+import { CoinbaseConnector } from "./connectors/coinbase/coinbase-connector";
+import { KrakenConnector } from "./connectors/kraken/kraken-connector";
+import { OKXConnector } from "./connectors/okx/okx-connector";
 
 async function main() {
   console.log("[MarketDataService] starting...");
 
-  // 1️⃣ Infra
+  // -----------------------------
+  // Infra
+  // -----------------------------
   const ch = createCH();
 
-  // 2️⃣ Ingestors
   const tradeIngestor = createTradesIngestor(ch);
-  const orderBookEventsIngestor = createOrderBookEventsIngestor(ch);
-  const orderBookLevelsIngestor = createOrderBookLevelsIngestor(ch);
+  const obEventIngestor = createOrderBookEventsIngestor(ch);
+  const obLevelIngestor = createOrderBookLevelsIngestor(ch);
 
-  // 3️⃣ Wiring (the heart)
+  // -----------------------------
+  // Wiring (single fan-in)
+  // -----------------------------
   const unsubscribe = marketDataEmitter.subscribe((event) => {
     switch (event.type) {
       case "trade":
@@ -27,35 +34,60 @@ async function main() {
         break;
 
       case "orderbook":
-        orderBookEventsIngestor.ingest(event);
-        orderBookLevelsIngestor.ingest(event);
+        obEventIngestor.ingest(event);
+        obLevelIngestor.ingest(event);
         break;
 
       default:
-        // future-proofing
+        // future-proof
         break;
     }
   });
 
-  // 4️⃣ Data sources
-  const binance = new BinanceConnector(["BTCUSDT"]);
-  await binance.connect();
+  // -----------------------------
+  // Symbols (canonical)
+  // -----------------------------
+  const SYMBOLS = {
+    binance: ["BTCUSDT"],
+    coinbase: ["BTC-USD"],
+    kraken: ["BTC/USD"],
+    okx: ["BTC-USDT"],
+  };
 
-  console.log("[MarketDataService] connected");
+  // -----------------------------
+  // Connectors (parallel)
+  // -----------------------------
+  const connectors = [
+    new BinanceConnector(SYMBOLS.binance),
+    new CoinbaseConnector(SYMBOLS.coinbase),
+    new KrakenConnector(SYMBOLS.kraken),
+    new OKXConnector(SYMBOLS.okx),
+  ];
 
-  // 5️⃣ Graceful shutdown
+  connectors.forEach((c) => c.connect());
+
+  console.log("[MarketDataService] all connectors started");
+
+  // -----------------------------
+  // Graceful shutdown
+  // -----------------------------
+  let shuttingDown = false;
+
   async function shutdown() {
+    if (shuttingDown) return;
+    shuttingDown = true;
+
     console.log("[MarketDataService] shutting down...");
 
     unsubscribe();
 
     await tradeIngestor.flush();
-    await orderBookEventsIngestor.flush();
-    await orderBookLevelsIngestor.flush();
+    await obEventIngestor.flush();
+    await obLevelIngestor.flush();
 
     tradeIngestor.stop();
-    orderBookEventsIngestor.stop();
-    orderBookLevelsIngestor.stop();
+    obEventIngestor.stop();
+    obLevelIngestor.stop();
 
     process.exit(0);
   }

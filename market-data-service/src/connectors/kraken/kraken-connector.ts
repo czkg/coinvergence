@@ -13,7 +13,7 @@ export class KrakenConnector {
     this.ws = new WebSocket(url);
 
     this.ws.on("open", () => {
-      console.log("[Kraken] connected");
+      console.log("[Kraken] websocket connected");
 
       // -----------------------------
       // ORDERBOOK
@@ -42,20 +42,39 @@ export class KrakenConnector {
       try {
         const json = JSON.parse(msg.toString());
 
-        // -----------------------------
+        // --------------------------------------------------
+        // SUBSCRIPTION CONFIRMATION (log like Binance)
+        // --------------------------------------------------
+        if (json?.event === "subscriptionStatus" && json.status === "subscribed") {
+          if (typeof json.channelName === "string") {
+            if (json.channelName.startsWith("book")) {
+              console.log(
+                `[Kraken] orderbook connected: ${json.pair}`
+              );
+            }
+            if (json.channelName === "trade") {
+              console.log(
+                `[Kraken] trade connected: ${json.pair}`
+              );
+            }
+          }
+          return;
+        }
+
+        // --------------------------------------------------
         // ORDERBOOK
-        // -----------------------------
+        // --------------------------------------------------
         const ob = normalizeKrakenOrderBook(json);
         if (ob) {
           marketDataEmitter.emit(ob);
         }
 
-        // -----------------------------
+        // --------------------------------------------------
         // TRADE (may be multiple)
-        // -----------------------------
+        // --------------------------------------------------
         const trades = normalizeKrakenTrade(json);
         if (trades) {
-          trades.forEach(trade => marketDataEmitter.emit(trade));
+          trades.forEach((trade) => marketDataEmitter.emit(trade));
         }
       } catch (err) {
         console.error("[Kraken] parse error:", err);
@@ -63,7 +82,7 @@ export class KrakenConnector {
     });
 
     this.ws.on("close", () => {
-      console.log("[Kraken] closed, reconnecting...");
+      console.log("[Kraken] websocket closed, reconnecting...");
       setTimeout(() => this.connect(), 2000);
     });
 

@@ -14,10 +14,18 @@ const state: KrakenOrderBookState = {
 
 /**
  * Normalize Kraken orderbook WS messages (snapshot + diff).
+ *
+ * Kraken message types:
+ * - System/status messages: object (ignored)
+ * - Data messages: array
+ *   [ channelId, data, channelName, pair ]
  */
 export function normalizeKrakenOrderBook(
   msg: any
 ): NormalizedOrderBookUpdate | null {
+  // ------------------------------------------------------------
+  // 1. Only array messages with minimum structure
+  // ------------------------------------------------------------
   if (!Array.isArray(msg) || msg.length < 4) return null;
 
   const channelID = msg[0];
@@ -25,12 +33,20 @@ export function normalizeKrakenOrderBook(
   const channelName = msg[2];
   const rawSymbol = msg[3];
 
-  // Only handle orderbook channels
+  // ------------------------------------------------------------
+  // 2. channelName must be string and book channel
+  // ------------------------------------------------------------
+  if (typeof channelName !== "string") return null;
   if (!channelName.startsWith("book")) return null;
+
+  // ------------------------------------------------------------
+  // 3. data must be object
+  // ------------------------------------------------------------
+  if (!data || typeof data !== "object") return null;
 
   const symbol = normalizeSymbol("kraken", rawSymbol);
 
-  // Map channel → symbol
+  // Map channel → symbol (stable after first snapshot)
   if (!state.channelToSymbol[channelID]) {
     state.channelToSymbol[channelID] = symbol;
   }
@@ -44,9 +60,9 @@ export function normalizeKrakenOrderBook(
   const ts_event = Date.now();
   const ts_recv = Date.now();
 
-  // -----------------------------
+  // ------------------------------------------------------------
   // SNAPSHOT
-  // -----------------------------
+  // ------------------------------------------------------------
   if (data.as || data.bs) {
     const asks = (data.as ?? []).map(
       ([p, s]: any) => [Number(p), Number(s)] as [number, number]
@@ -70,9 +86,9 @@ export function normalizeKrakenOrderBook(
     };
   }
 
-  // -----------------------------
+  // ------------------------------------------------------------
   // DIFF
-  // -----------------------------
+  // ------------------------------------------------------------
   if (data.a || data.b) {
     const askDiffs = (data.a ?? []).map(
       ([p, s]: any) => [Number(p), Number(s)] as [number, number]

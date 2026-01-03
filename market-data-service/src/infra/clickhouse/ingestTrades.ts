@@ -26,7 +26,6 @@ export function createTradesIngestor(ch: ClickHouseClient) {
 
   return {
     ingest(trade: NormalizedTrade) {
-      console.log("[ingestTrades] ingest called");
       batcher.push({
         exchange: trade.exchange,
         symbol: trade.symbol,
