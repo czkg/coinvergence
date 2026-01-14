@@ -14,5 +14,8 @@
     "@types/node": "^25.0.8",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@clickhouse/client": "^1.16.0"
   }
 }

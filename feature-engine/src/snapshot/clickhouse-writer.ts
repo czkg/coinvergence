@@ -1,6 +1,6 @@
 import { ClickHouseClient } from "@clickhouse/client";
 import { FeatureSnapshot } from "@shared/types/feature-snapshot";
-import { ClickHouseBatcher } from "../../infra/clickhouse/batcher";
+import { ClickHouseBatcher } from "@shared/utils/batcher";
 
 function toCHDateTime64(ms: number) {
   return new Date(ms).toISOString().replace("T", " ").replace("Z", "");

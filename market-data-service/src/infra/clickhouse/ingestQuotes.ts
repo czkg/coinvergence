@@ -1,5 +1,5 @@
 import { ClickHouseClient } from "@clickhouse/client";
-import { ClickHouseBatcher } from "./batcher";
+import { ClickHouseBatcher } from "@shared/utils/batcher";
 import type { NormalizedQuote } from "@shared/types/unified-market-data";
 
 function toCHDateTime64ms(ms: number) {

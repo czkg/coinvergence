@@ -4,10 +4,14 @@
     "module": "CommonJS",
     "moduleResolution": "Node",
 
-    "rootDir": "src",
     "outDir": "dist",
 
     "types": ["node"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    },
 
     "sourceMap": true,
     "declaration": true,
@@ -24,6 +28,6 @@
     "skipLibCheck": true,
     "resolveJsonModule": true
   },
-  "include": ["src"],
+  "include": ["src", "../shared"],
   "exclude": ["node_modules", "dist"]
 }

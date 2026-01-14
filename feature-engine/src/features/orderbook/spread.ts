@@ -4,19 +4,23 @@ import { MarketState } from "../../engine/market-state";
 /**
  * SpreadFeature
  *
- * Computes best ask - best bid from the order book.
- * Returns null if either side is missing.
+ * Computes bid-ask spread from order book state.
+ * Returns null if order book is not in a valid state.
  */
 export class SpreadFeature implements Feature<number | null> {
   readonly name = "spread";
 
   value(state: MarketState): number | null {
-    const bid = state.orderBook.bestBid();
-    const ask = state.orderBook.bestAsk();
+    const ob = state.orderBook;
 
-    if (!bid || !ask) {
-      return null;
-    }
+    if (!ob.isReady()) return null;
+
+    const bid = ob.getBestBid();
+    const ask = ob.getBestAsk();
+
+    if (!bid || !ask) return null;
+    if (ask.price <= 0 || bid.price <= 0) return null;
+    if (ask.price < bid.price) return null;
 
     return ask.price - bid.price;
   }
